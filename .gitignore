@@ -1,0 +1,32 @@
+# Local / agent notes — do not publish
+.workbuddy/
+.cursor/
+cursor-version-analysis.md
+
+# Build intermediates (not release artifacts)
+**/bin/
+**/obj/
+*.user
+
+# Tauri / Node / Rust
+**/node_modules/
+**/src-tauri/target/
+
+# Frontend Vite build output (under src/CursorVersionTool)
+src/CursorVersionTool/dist/
+
+# dist/: keep portable exe + NSIS setup for release; ignore everything else
+dist/*
+!dist/CursorVersionTool.exe
+!dist/Cursor Version Tool_*_x64-setup.exe
+dist/*-wrench.exe
+
+# Runtime / local test artifacts
+.test/
+_version_backups/
+*.log
+
+# OS junk
+.DS_Store
+Thumbs.db
+Desktop.ini

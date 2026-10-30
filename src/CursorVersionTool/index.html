@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cursor 版本管理工具</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <div id="app" class="app">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <img src="/app-icon.png" alt="" width="36" height="36" />
+          </div>
+          <div>
+            <h1>Cursor Version Tool</h1>
+            <p>本地版本号管理 · 可一键还原</p>
+          </div>
+        </div>
+        <div id="badges" class="badges" role="status" aria-live="polite"></div>
+      </header>
+
+      <main class="main">
+        <section class="hero card reveal" style="--d:0">
+          <div class="hero-accent" aria-hidden="true"></div>
+          <div class="hero-body">
+            <span class="eyebrow">当前版本</span>
+            <div id="hero-version" class="hero-version">—</div>
+            <div id="hero-sub" class="hero-sub">正在初始化…</div>
+          </div>
+        </section>
+
+        <section class="grid reveal" style="--d:1">
+          <article class="tile card">
+            <span class="eyebrow">安装目录</span>
+            <p id="lbl-install" class="tile-value" title="">—</p>
+          </article>
+          <article class="tile card">
+            <span class="eyebrow">Commit</span>
+            <p id="lbl-commit" class="tile-value mono">—</p>
+          </article>
+          <article class="tile card">
+            <span class="eyebrow">基线</span>
+            <p id="lbl-baseline" class="tile-value">—</p>
+            <p id="lbl-baseline-state" class="tile-meta">—</p>
+          </article>
+          <article class="tile card">
+            <span class="eyebrow">运行环境</span>
+            <p id="lbl-process" class="tile-value">—</p>
+            <p id="lbl-admin" class="tile-meta">—</p>
+          </article>
+        </section>
+
+        <section class="action card reveal" style="--d:2">
+          <span class="eyebrow">修改版本</span>
+          <label class="field-label" for="version-input">目标版本号</label>
+          <div class="action-row">
+            <input
+              id="version-input"
+              class="input"
+              type="text"
+              placeholder="例如 3.5.33"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <button id="btn-modify" class="btn btn-primary" type="button">修改版本</button>
+            <button id="btn-restore" class="btn btn-danger" type="button">恢复原版</button>
+          </div>
+          <div class="tools">
+            <button id="btn-refresh" class="btn btn-secondary" type="button">刷新</button>
+            <button id="btn-browse" class="btn btn-secondary" type="button">选择安装目录</button>
+            <button id="btn-advanced" class="btn btn-secondary" type="button">高级选项</button>
+            <button id="btn-elevate" class="btn btn-ghost" type="button">管理员重启</button>
+          </div>
+        </section>
+
+        <p class="tip reveal" style="--d:3">
+          改动仅写入本地 product.json / package.json。修改后请完全退出 Cursor 再打开。
+        </p>
+      </main>
+    </div>
+
+    <!-- Advanced modal -->
+    <div id="advanced-overlay" class="overlay" hidden>
+      <div class="modal card" role="dialog" aria-modal="true" aria-labelledby="adv-title">
+        <div class="modal-head">
+          <div>
+            <h2 id="adv-title">高级选项</h2>
+            <p class="modal-sub">谨慎修改。建议先建立基线，再调整 commit 或更新地址。</p>
+          </div>
+          <button id="btn-adv-close" class="icon-btn" type="button" aria-label="关闭"></button>
+        </div>
+
+        <div class="modal-section">
+          <span class="eyebrow">当前字段</span>
+          <p id="adv-commit" class="mono field-line">commit · —</p>
+          <p id="adv-vscode" class="mono field-line">vscodeVersion · —</p>
+          <p id="adv-update" class="mono field-line">updateUrl · —</p>
+        </div>
+
+        <div class="modal-section">
+          <span class="eyebrow">修改 commit / realCommit</span>
+          <label class="field-label" for="commit-input">Commit hash</label>
+          <div class="action-row">
+            <input
+              id="commit-input"
+              class="input"
+              type="text"
+              placeholder="7~40 位十六进制 hash"
+              spellcheck="false"
+            />
+            <button id="btn-commit" class="btn btn-primary" type="button">应用</button>
+          </div>
+        </div>
+
+        <div class="modal-section">
+          <span class="eyebrow">更新与基线</span>
+          <div class="tools wrap">
+            <button id="btn-disable-update" class="btn btn-secondary" type="button">禁用自动更新</button>
+            <button id="btn-restore-update" class="btn btn-secondary" type="button">恢复自动更新地址</button>
+            <button id="btn-rebaseline" class="btn btn-danger" type="button">重建基线（以当前为原版）</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- In-app dialog -->
+    <div id="dialog-overlay" class="overlay dialog-overlay" hidden>
+      <div class="modal card dialog-card" role="alertdialog" aria-modal="true" aria-labelledby="dialog-title">
+        <div class="dialog-icon" id="dialog-icon" aria-hidden="true"></div>
+        <h2 id="dialog-title">提示</h2>
+        <pre id="dialog-message" class="dialog-message"></pre>
+        <div class="dialog-actions">
+          <button id="dialog-cancel" class="btn btn-secondary" type="button">取消</button>
+          <button id="dialog-ok" class="btn btn-primary" type="button">确定</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Busy overlay -->
+    <div id="busy" class="overlay busy" hidden>
+      <div class="busy-card card">
+        <div class="spinner" aria-hidden="true"></div>
+        <p>处理中…</p>
+      </div>
+    </div>
+
+    <!-- Pick folder gate -->
+    <div id="boot-overlay" class="overlay" hidden>
+      <div class="modal card boot-card">
+        <h2>选择 Cursor 安装目录</h2>
+        <p class="modal-sub">未能自动定位安装路径。请选择包含 Cursor.exe 的目录。</p>
+        <button id="btn-boot-browse" class="btn btn-primary" type="button">浏览文件夹</button>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
