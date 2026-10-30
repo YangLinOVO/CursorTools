@@ -7,28 +7,26 @@
 
 ## 图形界面（推荐）
 
-双击 `dist\CursorVersionTool.exe` 即可使用（约 4 MB，依赖系统自带的 WebView2；Windows 11 通常已预装）。
+当前发布版本：**1.0.0**（产物已放在仓库 `dist\`，一般无需自行编译）。
+
+| 文件 | 说明 |
+|---|---|
+| `dist\CursorVersionTool.exe` | 绿色版，双击即用（~4.4 MB） |
+| `dist\Cursor Version Tool_1.0.0_x64-setup.exe` | NSIS 安装包（~1.5 MB，当前用户安装） |
+
+依赖系统自带的 WebView2；Windows 11 通常已预装。
+
+界面能力：查看状态、选择安装目录、修改版本、恢复原版、管理员提权；「高级」里可改 commit、禁用/恢复更新地址、重建基线。
 
 ### 自行打包
 
-需要：
-
-- [Node.js](https://nodejs.org/)（含 npm）
-- [Rust](https://rustup.rs/)（`cargo` / `rustc`）
-- Windows 上的 WebView2 Runtime（多数机器已有）
+需要：[Node.js](https://nodejs.org/)（含 npm）、[Rust](https://rustup.rs/)、WebView2 Runtime。
 
 ```powershell
 .\publish.ps1
 ```
 
-产出：
-
-| 文件 | 说明 |
-|---|---|
-| `dist\CursorVersionTool.exe` | 可直接运行的绿色版（~4 MB） |
-| `dist\Cursor Version Tool_1.0.0_x64-setup.exe` | NSIS 安装包（~1.5 MB） |
-
-界面能力：查看状态、选择安装目录、修改版本、恢复原版、管理员提权；「高级」里可改 commit、禁用/恢复更新地址、重建基线。
+会覆盖写出上述两个 `dist\` 文件（版本号来自 `src\CursorVersionTool\src-tauri\tauri.conf.json`）。
 
 开发调试：
 
@@ -44,11 +42,12 @@ npm run tauri -- dev
 
 | 文件 | 说明 |
 |---|---|
-| `src/CursorVersionTool/` | Tauri 2 图形界面（Rust 后端 + Web 前端） |
+| `dist\CursorVersionTool.exe` | 已发布的绿色版 GUI |
+| `dist\Cursor Version Tool_*_x64-setup.exe` | 已发布的 NSIS 安装包 |
+| `src/CursorVersionTool/` | Tauri 2 图形界面源码（Rust 后端 + Web 前端） |
 | `publish.ps1` | 一键发布到 `dist\` |
-| `cursor-version.ps1` | 控制台脚本（PowerShell 5.1，无需额外依赖） |
+| `cursor-version.ps1` | 控制台精简版（PowerShell 5.1，无需额外依赖） |
 | `cursor-version.cmd` | 脚本双击入口，内部以 `-ExecutionPolicy Bypass` 调用 ps1 |
-
 ---
 
 ## 脚本用法
@@ -153,8 +152,8 @@ cd <安装目录>\resources\app\bin
 ## 适用环境
 
 - Windows 10 / 11 x64。
-- 图形界面：Tauri 2（WebView2）；安装包约 1.5 MB，绿色 exe 约 4 MB。
-- 脚本入口：PowerShell 5.1（系统自带）。
+- 图形界面：Tauri 2（WebView2）；安装包约 1.5 MB，绿色 exe 约 4.4 MB。
+- 控制台精简版：PowerShell 5.1（系统自带），与 GUI 并行保留。
 - per-user 安装（`%LOCALAPPDATA%\Programs\cursor`）：普通权限即可。
 - per-machine 安装（`D:\cursor`、`C:\Program Files\Cursor`）：改 `product.json` 通常需要管理员；改注册表**必须**管理员。
 - 本工具只改文件与注册表，不碰网络层、不装证书、不动账号凭据。
